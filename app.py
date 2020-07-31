@@ -9,7 +9,7 @@ from check_mask import Check_Mask
 from capture import Capture
 from check_mask import mask_count,re_init
 #Remove logging
-
+import time
 import logging
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
@@ -29,28 +29,37 @@ app.config['SECRET_KEY'] = 'secret!'
 app.register_error_handler(404, page_not_found)
 
 # Socket
-socket = SocketIO(app, cors_allowed_origins="*",ping_interval=60000, ping_timeout=120000, async_mode = "threading")
+socketio = SocketIO(app, cors_allowed_origins="*",ping_interval=60000, ping_timeout=120000, async_mode = "threading")
 
 #Global Variables
-count = "0"
-icount = "0"
-lname = "breathing"
-dirpath =""
-Hrisk = 0
-Mrisk = 0
-Lrisk = 0
+
+sockets = {}
 #Load the models
 cough_model = init_cough_mask()
 
-capture = Capture(Check_Mask())
+class Socket:
+    def __init__(self, sid):
+        self.sid = sid
+        self.connected = True
+        self.count = "0"
+        self.icount = "0"
+        self.lname = "breathing"
+        self.dirpath =""
+        self.Hrisk = 0
+        self.Mrisk = 0
+        self.Lrisk = 0
+        self.capture = None
 
-
+    # Emits data to a socket's unique room
+    def emit(self, event, data):
+        socketio.emit(event, data, room=self.sid)
 
 def re_initialise():
     global Hrisk,Mrisk,Lrisk
     Hrisk = 0
     Mrisk = 0
     Lrisk = 0
+    capture = None
 
 # Load the html page as homepage
 @app.route('/', methods=['GET'])
@@ -65,38 +74,38 @@ def reply():
     return """
 
 # Return message on successful connection
-@socket.on('connect')
+@socketio.on('connect')
 def connection():
     currentSocketId = request.sid
-    print ("Connected with: ",currentSocketId)
-    socket.emit('message', 'connected established')
+    sockets[request.sid] = Socket(request.sid)
+    sockets[request.sid].emit('message', 'connected established')
 
-@socket.on('started')
+@socketio.on('started')
 def started_feed(message):
     print(message)
     re_initialise()
-    global dirpath
+    sockets[request.sid].capture = Capture(Check_Mask())
     currentSocketId = request.sid
     folder = os.path.join(os.getcwd(),"static")
-    dirpath = os.path.join(folder,currentSocketId)
-    if not os.path.isdir(dirpath):
-        os.mkdir(dirpath)
-    print(dirpath)
+    sockets[request.sid].dirpath = os.path.join(folder,currentSocketId)
+    if not os.path.isdir(sockets[request.sid].dirpath):
+        os.mkdir(sockets[request.sid].dirpath)
+    # print(dirpath)
 
 
 #Receive the blob and process it
-@socket.on('blob_event')
+@socketio.on('blob_event')
 def handle_blob(message):
-    global count
-    global lname
-    global dirpath
+    # global count
+    # global lname
+    # global dirpath
     currentSocketId = request.sid
 
     #Declaring filename and videoname)
-    filename = "video" + count + ".webm"
+    filename = "video" + sockets[request.sid].count + ".webm"
 
 
-    filepath = os.path.join(dirpath,filename)
+    filepath = os.path.join(sockets[request.sid].dirpath,filename)
 
 
     data = base64.b64decode(message)
@@ -111,29 +120,29 @@ def handle_blob(message):
         return
 
     #Updating information
-    count = str(int(count)+1)
+    sockets[request.sid].count = str(int(sockets[request.sid].count)+1)
     print ("Processing now: ", filepath)
 
     #function for audio processing
 
-    lname,lprob = print_prediction(cough_model,filepath)
-    print("Predicted class:",lname)
-    socket.emit('label_event',{"label":lname,"prob":str(lprob)})
+    sockets[request.sid].lname,lprob = print_prediction(cough_model,filepath)
+    print("Predicted class:",sockets[request.sid].lname)
+    sockets[request.sid].emit('label_event',{"label":sockets[request.sid].lname,"prob":str(lprob)})
     # os.remove(filepath)
 
 
-@socket.on('input_image')
+@socketio.on('input_image')
 def test_message(image):
-    global icount,lname,dirpath,Hrisk,Lrisk,Mrisk
+    # global icount,lname,dirpath,Hrisk,Lrisk,Mrisk
 
     # Saving image
     image = image.split(",")[1]
-    iname = icount + ".jpg"
+    iname = sockets[request.sid].icount + ".jpg"
     currentSocketId = request.sid
-    if not os.path.isdir(dirpath):
-        os.mkdir(dirpath)
+    if not os.path.isdir(sockets[request.sid].dirpath):
+        os.mkdir(sockets[request.sid].dirpath)
     # Creating folder to save images
-    ipath = os.path.join(dirpath,"images")
+    ipath = os.path.join(sockets[request.sid].dirpath,"images")
 
     if not os.path.isdir(ipath):
         os.mkdir(ipath)
@@ -143,47 +152,47 @@ def test_message(image):
         f.write(base64.b64decode(image))
 
     # Send image for processing
-    capture.enqueue_input(ipath,lname)
-    icount = str(int(icount)+1)
+    sockets[request.sid].capture.enqueue_input(ipath,sockets[request.sid].lname)
+    sockets[request.sid].icount = str(int(sockets[request.sid].icount)+1)
 
     imagepath = os.path.join(currentSocketId,"images")
     imagepath = os.path.join(imagepath,iname)
 
-    frame = capture.get_frame()
+    frame = sockets[request.sid].capture.get_frame()
 
     if os.sep == '\\':
         imagepath = imagepath.replace('\\','/')
 
-    # Response with the processed image
-    # print("Sending image")
-    socket.emit("response_back",url_for("static",filename = imagepath))
-    if int(icount) % 5 ==0:
+    sockets[request.sid].emit("response_back",url_for("static",filename = imagepath))
+
+    if int(sockets[request.sid].icount) % 5 ==0:
         hrisk,mrisk,lrisk = mask_count()
         re_init()
-        Hrisk += hrisk
-        Lrisk += lrisk
-        Mrisk += mrisk
-        print("High Risk: ",Hrisk,"Moderate Risk: ",Mrisk,"Low Risk: ",Lrisk)
-        socket.emit('stopped',{"High Risk": Hrisk,"Moderate Risk":Mrisk,"Low Risk":Lrisk})
+        sockets[request.sid].Hrisk += hrisk
+        sockets[request.sid].Lrisk += lrisk
+        sockets[request.sid].Mrisk += mrisk
+        print("High Risk: ",sockets[request.sid].Hrisk,"Moderate Risk: ",sockets[request.sid].Mrisk,"Low Risk: ",sockets[request.sid].Lrisk)
+        sockets[request.sid].emit('stopped',{"High Risk": sockets[request.sid].Hrisk,"Moderate Risk":sockets[request.sid].Mrisk,"Low Risk":sockets[request.sid].Lrisk})
 
-@socket.on('stopped')
+@socketio.on('stopped')
 def stopped_function(message):
     print(message)
-    global dirpath
-    shutil.rmtree(dirpath)
-    print("In Stop: ",dirpath)
+    # global dirpath
+    shutil.rmtree(sockets[request.sid].dirpath)
+    # print("In Stop: ",dirpath)
 
-@socket.on('disconnect')
+
+@socketio.on('disconnect')
 def disconnect_function():
     try:
-        global dirpath
-        shutil.rmtree(dirpath)
+        # global dirpath
+        shutil.rmtree(sockets[request.sid].dirpath)
     except:
         pass
     print("Disconnected the socket: ")
-    socket.emit("Manual Disconnect")
+    sockets[request.sid].emit("Manual Disconnect")
 
-@socket.on('uncaughtException')
+@socketio.on('uncaughtException')
 def exceptiony():
     # handle or ignore error
     console.log(exception);
@@ -191,4 +200,4 @@ def exceptiony():
 
 if __name__ == '__main__':
     print ("socket listening on 8000")
-    socket.run(app, port = 8000, host='0.0.0.0')
+    socketio.run(app, port = 8000, host='0.0.0.0')

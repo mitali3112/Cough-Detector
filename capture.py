@@ -14,6 +14,7 @@ class Capture(object):
         thread.daemon = True
         thread.start()
 
+
     def process_one(self):
         if not self.to_process:
             return
@@ -24,8 +25,12 @@ class Capture(object):
 
 
         ################## where the hard work is done ############
-        # output_img is an PIL image
+        # output_img is an imagepath
         output_img = self.check_mask.check_mask(label,input_str)
+        if output_img == "":
+            thread= threading.currentThread()
+            thread.to_run = False
+
 
         self.to_output.append(output_img)
 

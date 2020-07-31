@@ -48,7 +48,12 @@
 <script src="{{ url_for('static',filename='js/predict.js') }}"></script>
 <script type="text/javascript" charset="utf-8">
 
-  var socket = io('https://' + document.domain + ':' + location.port);
+  if(document.domain == "localhost"){
+    var socket = io('http://' + document.domain + ':' + location.port);
+  }
+  else {
+    var socket = io('https://' + document.domain + ':' + location.port);
+  }
   var isConnected = false
   socket.on('connect',function(){
     isConnected = true
