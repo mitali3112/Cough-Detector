@@ -3,6 +3,13 @@ window.onload = function(){
   let st = document.getElementById("start");
   let sp = document.getElementById("stop");
   let im = document.getElementById("image");
+  let vd = document.getElementById("videostyle");
+  let ims = document.getElementById("imagestyle");
+
+
+  var canvas1 = document.querySelector('.visualizer');
+  // console.log(canvas1);
+  var canvasCtx = canvas1.getContext("2d");
 
   //let video = document.querySelector('#videoElement');
 //Global variable
@@ -15,6 +22,7 @@ window.onload = function(){
 
   let video = document.querySelector("#videoElement");
   let canvas = document.querySelector("#canvasElement");
+  var canvasCtx
   let ctx = canvas.getContext('2d');
 
 
@@ -22,7 +30,25 @@ window.onload = function(){
     console.log(message)
     label = message["label"]
     prob = parseFloat(message["prob"])
-    console.log(label,prob)
+     if (label === "wet cough" || label == "dry cough"){
+        if (label == "dry cough" && prob >= 0.50){
+         pred.innerHTML = "Dry Cough"
+         }
+         else{
+           pred.innerHTML = "Wet Cough"
+         }
+       }
+     else{
+         if (stopRecord.disabled == true){
+             pred.innerHTML = ""
+           }
+         else
+           {
+           pred.innerHTML = "Not Cough";
+
+           }
+
+        }
 
     });
 
@@ -48,6 +74,7 @@ window.onload = function(){
 
         window.rec = new MediaRecorder(stream);
 
+        visualize(stream);
         localMediaStream = stream;
         video.style.display = "none";
 
@@ -116,11 +143,11 @@ window.onload = function(){
                 base64data = reader.result.split(',')[1];
                 //console.log(base64data);
                 socket.emit("blob_event",base64data)
-
            }
 
 
 
+          /*
           var element = document.getElementById("container1");
 
 
@@ -149,8 +176,12 @@ window.onload = function(){
                 pred.innerHTML = "Detecting...";
                 }
                 element.style.display = "none";
-              }
+              } */
+
+
           }
+
+
 
            // When start button is clicked.
 
@@ -163,6 +194,9 @@ window.onload = function(){
             video.style.display = "inline-block"
             video.srcObject = localMediaStream
             im.style.display = "inline-block"
+            vd.style.display = "inline-block"
+            ims.style.display = "flex"
+            canvas1.style.display = "inline-block"
 
             console.log('Start:I was clicked')
             record.disabled = true;
@@ -189,6 +223,9 @@ window.onload = function(){
             video.srcObject = null;
             video.style.display = "none"
             im.style.display = "none"
+            vd.style.display = "none"
+            ims.style.display = "none"
+            canvas1.style.display = "none"
 
             console.log("Stop:I was clicked")
             record.disabled = false;
@@ -199,4 +236,60 @@ window.onload = function(){
             rec.stop();
 
           }
+
+          function visualize(stream) {
+              audioCtx = new AudioContext();
+
+
+              const source = audioCtx.createMediaStreamSource(stream);
+
+              const analyser = audioCtx.createAnalyser();
+              analyser.fftSize = 2048;
+              const bufferLength = analyser.frequencyBinCount;
+              const dataArray = new Uint8Array(bufferLength);
+
+              source.connect(analyser);
+              //analyser.connect(audioCtx.destination);
+
+              draw()
+
+              function draw() {
+                const WIDTH = canvas1.width
+                const HEIGHT = canvas1.height;
+
+                requestAnimationFrame(draw);
+
+                analyser.getByteTimeDomainData(dataArray);
+
+                canvasCtx.fillStyle = 'rgb(200, 200, 200)';
+                canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+
+                canvasCtx.lineWidth = 2;
+                canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
+
+                canvasCtx.beginPath();
+
+                let sliceWidth = WIDTH * 1.0 / bufferLength;
+                let x = 0;
+
+
+                for(let i = 0; i < bufferLength; i++) {
+
+                  let v = dataArray[i] / 128.0;
+                  let y = v * HEIGHT/2;
+
+                  if(i === 0) {
+                    canvasCtx.moveTo(x, y);
+                  } else {
+                    canvasCtx.lineTo(x, y);
+                  }
+
+                  x += sliceWidth;
+                }
+
+                canvasCtx.lineTo(canvas1.width, canvas1.height/2);
+                canvasCtx.stroke();
+
+              }
+            }
       }

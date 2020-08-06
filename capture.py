@@ -10,6 +10,7 @@ class Capture(object):
         self.to_output = []
         self.check_mask = check_mask
         self.labelname = ""
+        self.labelprob = 0
         thread = threading.Thread(target=self.keep_processing, args=())
         thread.daemon = True
         thread.start()
@@ -22,11 +23,11 @@ class Capture(object):
         # input is an ascii string.
         input_str = self.to_process.pop(0)
         label = self.labelname
-
+        lprob = self.labelprob
 
         ################## where the hard work is done ############
         # output_img is an imagepath
-        output_img = self.check_mask.check_mask(label,input_str)
+        output_img = self.check_mask.check_mask(label,lprob,input_str)
         if output_img == "":
             thread= threading.currentThread()
             thread.to_run = False
@@ -39,9 +40,10 @@ class Capture(object):
             self.process_one()
             sleep(0.01)
 
-    def enqueue_input(self, input,label):
+    def enqueue_input(self, input,label,lprob):
         self.to_process.append(input)
         self.labelname = label
+        self.labelprob = lprob
 
 
     def get_frame(self):
