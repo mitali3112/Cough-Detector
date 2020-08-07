@@ -20,6 +20,10 @@ import warnings
 warnings.filterwarnings("ignore")
 import shutil
 
+from engineio.payload import Payload
+
+Payload.max_decode_packets = 500
+
 #Function to handle unrequired pages
 def page_not_found(e):
     print('Not found')
@@ -122,12 +126,12 @@ def handle_blob(message):
     img_name = sockets[request.sid].count + ".png"
     img_savepath = (os.sep).join(filepath.split(os.sep)[:-1])
     img_savepath = os.path.join(img_savepath,img_name)
-    
+
 
     #function for audio processing
     sockets[request.sid].lname,sockets[request.sid].lprob = extract_features(cough_model,filepath,img_savepath)
     print("Predicted class:",sockets[request.sid].lname)
-    sockets[request.sid].emit('label_event',{"label":sockets[request.sid].lname,"prob":str(sockets[request.sid].lprob)})
+    sockets[request.sid].emit('label_event',{"label":sockets[request.sid].lname,"prob":str(sockets[request.sid].lprob),"video":filename})
 
 
 #Process the frames from the video feed
@@ -192,7 +196,7 @@ def disconnect_function():
     except:
         pass
     print("Disconnected the socket: ")
-    sockets[request.sid].emit("Manual Disconnect")
+    sockets[request.sid].emit('disconnect',"Manual Disconnect")
 
 @socketio.on('uncaughtException')
 def exception_func():
