@@ -118,7 +118,9 @@ class Check_Mask(object):
         iname = int((imgpath.split(os.sep)[-1]).split('.')[0])
 
 
-        if (label == "dry cough" or label == "wet cough")  and lprob >= 0.50:
+        if label == "dry cough" and lprob >= 0.50:
+            is_cough = True
+        elif label == "wet cough":
             is_cough = True
         else:
             is_cough = False

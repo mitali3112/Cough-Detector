@@ -30,15 +30,13 @@ window.onload = function(){
     console.log(message)
     label = message["label"]
     prob = parseFloat(message["prob"])
-     if (label === "wet cough" || label == "dry cough"){
-        if (label == "dry cough" && prob >= 0.50){
-         pred.innerHTML = "Dry Cough"
-         }
-         else{
-           pred.innerHTML = "Wet Cough"
-         }
-       }
-     else{
+    if (label === "wet cough"){
+      pred.innerHTML = "Wet Cough"
+    }
+    else if (label == "dry cough" && prob >= 0.50){
+      pred.innerHTML = "Dry Cough"
+    }
+    else{
          if (stopRecord.disabled == true){
              pred.innerHTML = ""
            }
