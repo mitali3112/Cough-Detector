@@ -47,7 +47,7 @@
         </style>
 </head>
 <script type="text/javascript">
-  // console.log = ()=>{};
+  console.log = ()=>{};
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.dev.js"></script>
 <!-- <script src="{{ url_for('static',filename='js/predict.js') }}"></script> -->
@@ -130,7 +130,7 @@
                         <hr class="divider light my-4" />
                         <p class="text-white-50 mb-4">Make sure there is sufficient lighting and your face is visible</p>
                         <p class="text-white-50 mb-4">Allow access to video and audio when prompted for the app to function properly</p>
-                        <p class="text-white-50 mb-4">The app detects faces within 3 feet distance. Kindly be patient, the feed will update within 10s at the most</p>
+                        <p class="text-white-50 mb-4">The app detects faces within 3 feet distance. Kindly be patient, the feed will update within 10 seconds at the most</p>
                         <p class="text-white-50 mb-4">The risk statistics update every 5 seconds and the report is displayed belowthe video feed</p>
                         <p class="text-white-50 mb-4">For best results, use the incognito mode in Google Chrome to avoid chrome filters</p>
 
@@ -150,7 +150,7 @@
                         <a id=record class="btn btn-light btn-xl js-scroll-trigger" style = "background-color: white;" href="#services">Start!</a>
                         <br>
                         <br>
-                        <p id = "start" class="text-muted mb-5"></p>
+                        <h5 id = "start" style="color:white;"></h5>
                     </div>
                 </div>
             </div>
@@ -160,7 +160,7 @@
             <div class="container text-center">
                 <h2 class="text-center mt-0">Results</h2>
                 <hr class="divider my-4" />
-                <h3 id="prediction" class="text-center mt-0"></h2>
+                <h3 id="tag" class="text-center mt-0" style="display:none;">Detecting...</h3>
                 <canvas class="visualizer" height="150px" style="display:none"></canvas>
                 <div id="animation" class="col-lg-12 text-center">
                 <div id=container1 >
@@ -200,11 +200,15 @@
 
                   </div>
                   <br>
+                  <hr id="divide" class="divider my-4" style="display:none;"/>
+                  <h3 id="prediction" class="text-center mt-0"></h2>
+                  <br>
+
                   <div class="col-lg-12 text-center">
                     <a id=stopRecord disabled class="btn btn-light btn-xl js-scroll-trigger mt-0" href="#services">Stop!</a>
                     <br>
                     <br>
-                    <p id = "stop" class="text-white-50 mb-4"></p>
+                    <h5 id = "stop" style="color:#f4623a; background-color:white;"></h5>
                     <hr class="divider my-4" />
                   </div>
 

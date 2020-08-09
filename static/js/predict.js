@@ -5,7 +5,10 @@ window.onload = function(){
   let im = document.getElementById("image");
   let vd = document.getElementById("videostyle");
   let ims = document.getElementById("imagestyle");
-
+  let t = document.getElementById("tag");
+  let d = document.getElementById("divide")
+  console.log(t);
+  console.log(d);
 
   var canvas1 = document.querySelector('.visualizer');
   // console.log(canvas1);
@@ -186,15 +189,16 @@ window.onload = function(){
           record.onclick = e => {
 
             st.innerHTML = "Started recording"
-            st.style.backgroundColor = "white"
             sp.innerHTML = ""
-            pred.innerHTML = "Detecting..."
+            pred.innerHTML = "Not Cough"
             video.style.display = "inline-block"
             video.srcObject = localMediaStream
             im.style.display = "inline-block"
             vd.style.display = "inline-block"
             ims.style.display = "flex"
             canvas1.style.display = "inline-block"
+            t.style.display = "block"
+            d.style.display = "block"
 
             console.log('Start:I was clicked')
             record.disabled = true;
@@ -216,7 +220,6 @@ window.onload = function(){
 
             st.innerHTML = ""
             sp.innerHTML = "Stopped recording"
-            sp.style.backgroundColor = "#f4623a"
             pred.innerHTML = ""
             video.srcObject = null;
             video.style.display = "none"
@@ -224,6 +227,8 @@ window.onload = function(){
             vd.style.display = "none"
             ims.style.display = "none"
             canvas1.style.display = "none"
+            t.style.display = "none"
+            d.style.display = "none"
 
             console.log("Stop:I was clicked")
             record.disabled = false;

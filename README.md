@@ -15,7 +15,7 @@ To monitor the presence of face masks and detect coughs in real time and classif
 <a href="https://pnuemosenseai.azurewebsites.net/" target="_blank">https://pnuemosenseai.azurewebsites.net/</a>
 
 #### Troubleshooting
-* In case the trigger doesn't appear at all, it is advised to open the link in the incognito mode.
+* It is advised to open the link in the incognito mode.
 * Latency: latency depends on the GPU of the system on which  you are running the web application. For best results, A high performing GPU is required.
 
 #### How do I deploy the app?
