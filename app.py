@@ -24,6 +24,8 @@ from engineio.payload import Payload
 
 Payload.max_decode_packets = 500
 
+
+
 #Function to handle unrequired pages
 def page_not_found(e):
     print('Not found')
@@ -33,6 +35,11 @@ def page_not_found(e):
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 app.register_error_handler(404, page_not_found)
+app.config.update(
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+)
 
 # Socket
 socketio = SocketIO(app, cors_allowed_origins="*",ping_interval=60000, ping_timeout=120000, async_mode = "threading")
