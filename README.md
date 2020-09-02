@@ -39,7 +39,7 @@ The following package versions must be installed to successfully deploy the mode
 * scipy 1.4.1
 * setuptools 41.0.0
 
-To run the model on your <b>local machine</b>, you can download this repository as a zip file, clone or pull it by using the command
+To run the model on your <b>local machine</b>,download this repository as a zip file, clone or pull it by using the command
 ```
 $ git pull https://github.com/mitali3112/Cough-Detector.git
 ```
