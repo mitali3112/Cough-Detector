@@ -12,7 +12,7 @@ To monitor the presence of face masks and detect coughs in real time and classif
 * Bootstrap 4
 
 ##### The Web Application is deployed on Microsoft Azure, and can be accessed via 
-<a href="https://pnuemosenseai.azurewebsites.net/" target="_blank">https://pnuemosenseai.azurewebsites.net/</a>
+<a href="https://pnuemosenseai.azurewebsites.net/" target="_blank">https://pnuemosenseai.azurewebsites.net/</a>  [Unavailable now]
 
 #### Troubleshooting
 * It is advised to open the link in the incognito mode.
