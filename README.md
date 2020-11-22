@@ -47,7 +47,7 @@ or
 ```
 $ git clone https://github.com/mitali3112/Cough-Detector.git
 ```
-Requirements can be installed using the command (from the command-line)
+Requirements can be installed using the command (from the command-line) preferably in a virtual environment.
 ```
 $ pip install -r requirements.txt
 ```
