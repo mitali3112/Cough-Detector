@@ -61,6 +61,9 @@ to deploy the app locally.
 
 On your web browser go to <a href="http://localhost:8000/" target="_blank">http://localhost:8000/</a>
 
+#### Demo
+![COVID-19  Risk Assessment App Demo](cough_detector_demo (1).mp4)
+
 #### Contributers
 * Aparna Ranjith
 * Gunveen Batra
@@ -70,3 +73,4 @@ On your web browser go to <a href="http://localhost:8000/" target="_blank">http:
 
 #### Acknowledgements 
 We thank B-Aegis Life Sciences for the opportunity.
+
